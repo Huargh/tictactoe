@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
   <link type="text/css" href="jquery/jquery-ui.min.css" rel="stylesheet"/>
   <link type="text/css" href="jquery/jquery-ui.structure.min.css" rel="stylesheet"/>
   <link type="text/css" href="jquery/jquery-ui.theme.min.css" rel="stylesheet"/>
@@ -14,29 +16,29 @@
   <div id="dialog" title="Pick a Symbol">
     <p>Pick a Symbol. X starts</p>
   </div>
-  <div class="container">
     <div class="headline">
-      <p>You're playing </p>
+      <p>You're playing: <span id="playerSymbol"><span> </p>
     </div>
     <div class="gamefield">
       <div class="row"> <!-- First line -->
-        <button class="btn" value=""></button>
-        <button class="btn" value=""></button>
-        <button class="btn" value=""></button>
+        <button class="btn" id="0" value=""></button>
+        <button class="btn" id="1" value=""></button>
+        <button class="btn" id="2" value=""></button>
       </div>
       <div class="row"> <!-- Second line -->
-        <button class="btn" value=""></button>
-        <button class="btn" value=""></button>
-        <button class="btn" value=""></button>
+        <button class="btn" id="3" value=""></button>
+        <button class="btn" id="4" value=""></button>
+        <button class="btn" id="5" value=""></button>
       </div>
       <div class="row"> <!-- Third line -->
-        <button class="btn" value=""></button>
-        <button class="btn" value=""></button>
-        <button class="btn" value=""></button>
-
+        <button class="btn" id="6" value=""></button>
+        <button class="btn" id="7" value=""></button>
+        <button class="btn" id="8" value=""></button>
       </div>
     </div>
-  </div> <!-- container-->
+    <div class="option">
+      <button id="again">New Game</button>
+    </div>
   <!-- Scripts -->
     <script src="main.js"></script>
 </body>
