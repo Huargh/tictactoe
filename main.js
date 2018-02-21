@@ -64,6 +64,7 @@ function turnPlayed( ) {
 };
 
 function human_plays(cell) {
+  console.log("human_plays");
   cell.text(playerSymbol);
   no_of_moves++;
   humanFields.push(parseInt(cell.attr('id')));
@@ -81,6 +82,7 @@ function return_cells_avail() {
 };
 
 $('.btn').click(function() {
+  console.log("$('.btn').click");
   if (playerWon(humanFields)) {
     alert("Congratulations! You won!");
     gameOver = true; }
