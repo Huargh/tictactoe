@@ -10,7 +10,6 @@ const winLines = [
 ];
 var humanFields = [];
 var computerFields = [];
-var buttonsList = document.querySelectorAll('.btn');
 
 $( document ).ready( startGame() );
 
@@ -48,49 +47,47 @@ function pickSign() {
   });
 };
 
-function turnPlayed( ) {
-  var currentVal = $(this).text();
-  if (currentVal !== "") {
-    alert("Hang on... that's not a valid turn!");
-  }
-  else {
-    human_plays($(this));
-    if (gameOver === false) {
-      setTimeout(function() {
-        computer_plays()
-      }, 400);
-    }
-  }
-};
-
-function human_plays(cell) {
-  console.log("human_plays");
-  cell.text(playerSymbol);
+function human_plays(button) {
+  button.text(playerSymbol);
   no_of_moves++;
-  humanFields.push(parseInt(cell.attr('id')));
+  humanFields.push(parseInt(button.attr('id')));
   humanFields.sort( );
 };
 
 function computer_plays() {
-  var playable = return_cells_avail(); //array of empty cells
-  //2DO: How Does computer Determine the cell to play?
-  computer_clicks(playable[0]); //For now: Take the first one available
+  var playable = return_cells_avail(); //array of fields not yet played
+  //2DO: More intelligent behavior
+  computer_clicks(playable[Math.floor(Math.random() * playable.length)]);
 };
 
 function return_cells_avail() {
   return board.filter( el => !humanFields.includes( el ) && !computerFields.includes( el ) );
 };
 
-$('.btn').click(function() {
-  console.log("$('.btn').click");
-  if (playerWon(humanFields)) {
-    alert("Congratulations! You won!");
-    gameOver = true; }
-  else if (playerWon(computerFields)) {
-    alert("Sorry, you lost. Better luck next time!");
-    gameOver = true;
+function turnPlayed(button) {
+  if (!gameOver) {
+  if ($(this).text() !== "") {
+    alert("Hang on... that's not a valid turn!");
   }
-});
+  else {
+    human_plays($(this));
+    if (playerWon(humanFields)) {
+      setTimeout(function(){ alert("Congratulations! You won!") }, 10);
+      gameOver = true; }
+    if (gameOver === false) {
+      setTimeout(function() {
+        computer_plays()
+        if (playerWon(computerFields)) {
+          setTimeout(function(){ alert("Sorry, you lost. Better luck next time!") }, 10);
+          gameOver = true;
+        }
+      }, 400);
+    }
+  }
+
+
+}
+};
 
 function computerStarts( ) {
   $('#0').text(computerSymbol);
@@ -102,12 +99,14 @@ function computerStarts( ) {
 function computer_clicks(cellID) {
   var btnID = '#' + cellID;
   $(btnID).text(computerSymbol);
+  no_of_moves++;
   computerFields.push(cellID);
   computerFields.sort();
 }
 
 function clearBoard( ) {
   var btnID;
+  var buttonsList = document.querySelectorAll('.btn');
   humanFields = [];
   computerFields = [];
   for (i = 0; i < 9; i++) {
@@ -129,10 +128,14 @@ function playerWon(playerArr) {
           cellCount++;
           if (cellCount === 3) {
             mark_red(winLines[i]);
+            remove_event_listener( );
             return true;
           }
         }
     }
+  }
+  if (no_of_moves === 9) {
+    alert("That's a draw. You are both winners. yay.");
   }
 }
 
@@ -144,4 +147,11 @@ function mark_red(winArr) {
     $(btnID).css("background-color","red");
     gameOver = true;
   }
-}
+};
+
+function remove_event_listener( ) {
+  var buttonsList = document.querySelectorAll('.btn');
+  for (var i = 0; i < buttonsList.length; i++) {
+    buttonsList[i].removeEventListener('click', turnPlayed, false);
+  }
+};
