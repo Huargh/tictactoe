@@ -1,12 +1,12 @@
-var playerSymbol;
+var humanSymbol;
 var computerSymbol = "O";
 var no_of_moves = 0;
 var gameOver
-var board = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+var globalBoard = [0, 1, 2, 3, 4, 5, 6, 7, 8];
 const winLines = [
-  [0, 1, 2], [3, 4, 5], [6, 7, 8], //horizontal
-  [0, 3, 6], [1, 4, 7], [2, 5, 8], //vertical
-  [0, 4, 8], [2, 4, 6] //diagonal
+  [0, 1, 2], [3, 4, 5], [6, 7, 8], // horizontal
+  [0, 3, 6], [1, 4, 7], [2, 5, 8], // vertical
+  [0, 4, 8], [2, 4, 6] // diagonal
 ];
 var humanFields = [];
 var computerFields = [];
@@ -31,16 +31,16 @@ function pickSign() {
     height:190,
     modal: true,
     buttons: { "X": function() {
-                    playerSymbol = "X";
+                    humanSymbol = "X";
                     computerSymbol = "O";
-                    $("#playerSymbol").html(playerSymbol);
+                    $("#humanSymbol").html(humanSymbol);
                     $( this ).dialog( "close" );
                  },
                  "O": function() {
-                   playerSymbol = "O";
+                   humanSymbol = "O";
                    computerSymbol = "X";
                    computerStarts( computerSymbol )
-                   $("#playerSymbol").html(playerSymbol);
+                   $("#humanSymbol").html(humanSymbol);
                    $( this ).dialog( "close" );
                  }
              }
@@ -48,58 +48,125 @@ function pickSign() {
 };
 
 function human_plays(button) {
-  button.text(playerSymbol);
+  var fieldIDPlayed;
+  button.text(humanSymbol);
   no_of_moves++;
-  humanFields.push(parseInt(button.attr('id')));
+  fieldIDPlayed = parseInt(button.attr('id'))
+  humanFields.push(fieldIDPlayed);
+  globalBoard[fieldIDPlayed] = humanSymbol;
   humanFields.sort( );
 };
 
 function computer_plays() {
-  var playable = return_cells_avail(); //array of fields not yet played
-  //2DO: More intelligent behavior
-  computer_clicks(playable[Math.floor(Math.random() * playable.length)]);
+  // computer_clicks(playable[Math.floor(Math.random() * playable.length)]);
+  computer_clicks(minimax(globalBoard, computerSymbol).index);
 };
 
-function return_cells_avail() {
-  return board.filter( el => !humanFields.includes( el ) && !computerFields.includes( el ) );
+function minimax(currentBoard, playerSymbol){
+  var availSpots = return_cells_avail(currentBoard);
+
+  // console.log(availSpots);
+  if (winner_per_board(currentBoard, humanSymbol)){
+    return {score:-1} }
+	else if (winner_per_board(currentBoard, computerSymbol)){
+    return {score:1} }
+  else if (availSpots.length === 0){
+  	return {score:0} }
+
+var moves = [];
+  for (var i = 0; i < availSpots.length; i++){
+    var move = {};
+  	move.index = currentBoard[availSpots[i]];
+    currentBoard[availSpots[i]] = playerSymbol;
+    if (playerSymbol == computerSymbol){
+      var result = minimax(currentBoard, humanSymbol);
+      move.score = result.score;
+    }
+    else{
+      var result = minimax(currentBoard, computerSymbol);
+      move.score = result.score;
+    }
+    moves.push(move);
+    currentBoard[availSpots[i]] = move.index;
+  }
+
+  var bestMove;
+  if(playerSymbol === computerSymbol){
+    var bestScore = -100;
+    for(var i = 0; i < moves.length; i++){
+      if(moves[i].score > bestScore){
+        bestScore = moves[i].score;
+        bestMove = i;
+      }
+    }
+  } else {
+    var bestScore = 100;
+    for(var i = 0; i < moves.length; i++){
+      if(moves[i].score < bestScore){
+        bestScore = moves[i].score;
+        bestMove = i;
+      }
+    }
+  }
+  return moves[bestMove];
+}
+
+function winner_per_board(board, player) {
+  if (
+  (board[0] == player && board[1] == player && board[2] == player) ||
+  (board[3] == player && board[4] == player && board[5] == player) ||
+  (board[6] == player && board[7] == player && board[8] == player) ||
+  (board[0] == player && board[3] == player && board[6] == player) ||
+  (board[1] == player && board[4] == player && board[7] == player) ||
+  (board[2] == player && board[5] == player && board[8] == player) ||
+  (board[0] == player && board[4] == player && board[8] == player) ||
+  (board[2] == player && board[4] == player && board[6] == player)
+  ) {
+  return true;
+  }
+}
+
+function return_cells_avail(inBoard) {
+  // return inBoard.filter( el => !humanFields.includes( el ) &&
+	// !computerFields.includes( el ) );
+  return inBoard.filter(el => el !== computerSymbol && el !== humanSymbol);
 };
 
 function turnPlayed(button) {
   if (!gameOver) {
-  if ($(this).text() !== "") {
-    alert("Hang on... that's not a valid turn!");
-  }
-  else {
-    human_plays($(this));
-    if (playerWon(humanFields)) {
-      setTimeout(function(){ alert("Congratulations! You won!") }, 10);
-      gameOver = true; }
-    if (gameOver === false) {
-      setTimeout(function() {
-        computer_plays()
-        if (playerWon(computerFields)) {
-          setTimeout(function(){ alert("Sorry, you lost. Better luck next time!") }, 10);
-          gameOver = true;
-        }
-      }, 400);
+    if ($(this).text() !== "") {
+      alert("Hang on... that's not a valid turn!");
+    }
+    else {
+      human_plays($(this));
+      if (playerWon(humanFields)) {
+         remove_event_listener( );
+         setTimeout(function(){ alert("Congratulations! You won!") }, 10);
+         gameOver = true;
+       }
+       if (gameOver === false) {
+        setTimeout(function() {
+          computer_plays()
+          if (playerWon(computerFields)) {
+            remove_event_listener( );
+            setTimeout(function(){ alert("Sorry, you lost. Better luck next time!") }, 400);
+            gameOver = true;
+          }
+        }, 400);
+      }
     }
   }
-
-
-}
 };
 
 function computerStarts( ) {
-  $('#0').text(computerSymbol);
-  computerFields.push(parseInt($('#0').attr('id')));
-  computerFields.sort( );
-  no_of_moves++;
+  computer_clicks(0);
 };
 
 function computer_clicks(cellID) {
   var btnID = '#' + cellID;
   $(btnID).text(computerSymbol);
   no_of_moves++;
+  globalBoard[cellID] = computerSymbol;
   computerFields.push(cellID);
   computerFields.sort();
 }
@@ -109,6 +176,7 @@ function clearBoard( ) {
   var buttonsList = document.querySelectorAll('.btn');
   humanFields = [];
   computerFields = [];
+  globalBoard = [0, 1, 2, 3, 4, 5, 6, 7, 8];
   for (i = 0; i < 9; i++) {
     btnID = '#' + i;
     $(btnID).text('');
@@ -138,6 +206,7 @@ function playerWon(playerArr) {
     alert("That's a draw. You are both winners. yay.");
   }
 }
+
 
 function mark_red(winArr) {
   var btnId;
